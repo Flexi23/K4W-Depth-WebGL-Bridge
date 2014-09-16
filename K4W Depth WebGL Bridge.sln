@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "K4WanimationSaver", "K4WanimationSaver\K4WanimationSaver.csproj", "{595C82CA-7293-4C41-856F-BF7AA1D79A72}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "K4WframeSaver", "K4WframeSaver\K4WframeSaver.csproj", "{B89752BB-D8FD-4997-858A-96F61F84085C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C549D44F-0B03-435E-8520-41665AD7E506}"
+	ProjectSection(SolutionItems) = preProject
+		K4WframeViewer.html = K4WframeViewer.html
+		K4WframeViewer.js = K4WframeViewer.js
+		readme.html = readme.html
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{595C82CA-7293-4C41-856F-BF7AA1D79A72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{595C82CA-7293-4C41-856F-BF7AA1D79A72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{595C82CA-7293-4C41-856F-BF7AA1D79A72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{595C82CA-7293-4C41-856F-BF7AA1D79A72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B89752BB-D8FD-4997-858A-96F61F84085C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B89752BB-D8FD-4997-858A-96F61F84085C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B89752BB-D8FD-4997-858A-96F61F84085C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B89752BB-D8FD-4997-858A-96F61F84085C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

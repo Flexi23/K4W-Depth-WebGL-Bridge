@@ -1,0 +1,152 @@
+﻿<html>
+<head>
+	<title>K4W Depth WebGL Viewer</title>
+
+	<script id="vertex" type="x-shader/x-vertex">
+	attribute vec3 aPos;
+	attribute vec2 aTexCoord;
+	varying   vec2 uv;
+
+	void main(void) {
+		gl_Position = vec4(aPos, 1.);
+		uv = aTexCoord;
+	}
+	</script>
+
+	<script id="include" type="x-shader/x-vertex">
+	#ifdef GL_ES
+	precision highp float;
+	#endif
+
+	varying   vec2 uv;
+
+	vec2 gradient(sampler2D sampler, vec2 uv, vec2 d, vec4 selector){
+		vec4 dX = texture2D(sampler, uv + vec2(1.,0.)*d) - texture2D(sampler, uv - vec2(1.,0.)*d);
+		vec4 dY = texture2D(sampler, uv + vec2(0.,1.)*d) - texture2D(sampler, uv - vec2(0.,1.)*d);
+		return -vec2( dot(dX, selector), dot(dY, selector) );
+	}
+
+	vec2 rot90(vec2 vector){
+		return vector.yx*vec2(1,-1);
+	}
+	</script>
+
+	<script id="convert2float" type="x-shader/x-fragment">
+	uniform sampler2D rawDepth;
+
+	void main(void) {
+		vec2 rg = texture2D(rawDepth, uv).rg; // MSB come in red, LSB in green
+		gl_FragColor = vec4(1.- (256. * rg.r + rg.g)/32.); // normalize the depth to the range from 0 to 1 where 1 is the most near and also unresolved
+		gl_FragColor.g -= float(gl_FragColor.g == 1.); // tint invalid depth values magenta
+		gl_FragColor.a = 1.;
+	}
+	</script>
+
+	<script id="advanceDepth" type="x-shader/x-fragment">
+	uniform sampler2D unadvancedDepth;
+	uniform sampler2D advancedDepth;
+
+	uniform vec2 oooo; // orientation or offset otherwise. reasonable values for this: (1/512, 0) or (0, 1/512) for horizonal and vertical scan.
+
+	void main(void) {
+
+		float z = texture2D(unadvancedDepth, uv).z; // lookup from the unadvanced depth texture
+
+		if(z == 1.) // is true for the invalid pixels (the magenta tinted area)
+		{
+			z = min(z, texture2D(advancedDepth, uv).z); // the kernel's center
+			for(int i = 0; i < 31; i++)
+			{
+				z = min(z, texture2D(advancedDepth, uv - oooo*vec2(i)).z);
+				z = min(z, texture2D(advancedDepth, uv + oooo*vec2(i)).z);
+			}
+		}
+
+		gl_FragColor.x = 0.; // the red/green values are open for further inpainting turbulence later on
+		gl_FragColor.y = 0.; // using gradient descent in a another near neighborhood perhaps?
+		gl_FragColor.z = z;
+
+		gl_FragColor.a = 1.;
+	}
+	</script>
+
+	<script id="composite" type="x-shader/x-fragment">
+	uniform sampler2D rawDepth;
+	uniform sampler2D floatDepth;
+	uniform sampler2D advancedDepth;
+
+	uniform vec2 cursorPos;
+
+	void main(void) {
+		vec4 _rawDepth = texture2D(rawDepth, uv)*vec4(16.,1.,1.,1.);
+		
+		vec4 _floatDepth = texture2D(floatDepth, uv);
+		
+		float _invalidDepth = float(_floatDepth.z == 1.);
+		
+		_floatDepth.g -= _invalidDepth; // tint magenta
+
+		vec4 _advancedDepth = vec4(texture2D(advancedDepth, uv).z);
+		_advancedDepth.g -= float(_advancedDepth.g == 1.); // tint invalid depth values magenta
+
+		vec2 _gradient = gradient(advancedDepth, uv, vec2(1./512.,1./512.), vec4(0.,0.,1.,0.));
+		float _canny = length(_gradient)*(1.-_invalidDepth);
+		
+		vec4 _composite = mix(_advancedDepth, vec4(0.), _canny*256.);
+		_composite = clamp(_composite, 0., 1.);
+		
+		_composite = mix(_composite, vec4(1), _canny*32.);
+		_composite = clamp(_composite, 0., 1.);
+		
+		_composite = mix(_composite, vec4(0), _canny*8.);
+		_composite = clamp(_composite, 0., 1.);
+		
+		_composite = mix(_composite, vec4(1), _canny*4.);
+		_composite = clamp(_composite, 0., 1.);
+		
+		_composite.xz *= vec2(1.) + _gradient*512.*clamp(1.-_canny*64.,0.,1.);
+		_composite = clamp(_composite, 0., 1.);
+
+		vec4 hr1 = mix(_rawDepth, _floatDepth, float(cursorPos.x < uv.x));
+		vec4 hr2 = mix(_advancedDepth, _composite, float(cursorPos.x < uv.x));
+		
+		vec4 four = mix(hr1, hr2, float(cursorPos.y > uv.y));
+
+		gl_FragColor = four;
+
+		gl_FragColor.a = 1.;
+	}
+	</script>
+	<style type="text/css">
+		body {
+			background-color: #000000;
+			color: #FFFFFF;
+		}
+
+		#c {
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: -1;
+		}
+
+		a {
+			color: #FFFFFF;
+			font-weight: bold;
+		}
+
+		#desc {
+			background-color: rgba(0, 0, 0, 0.2);
+			width: 1024;
+		}
+	</style>
+</head>
+<body>
+	<div id="desc">
+		<input type="file" id="fileselector" />
+		<div id="frameInfo"></div>
+	</div>
+	<canvas id="c" width="512" height="424"></canvas>
+	<script src="K4WframeViewer.js" type="text/javascript"></script>
+</body>
+</html>

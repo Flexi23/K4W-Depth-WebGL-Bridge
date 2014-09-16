@@ -1,0 +1,23 @@
+﻿<html>
+<head>
+	<title>K4W Depth WebGL Bridge</title>
+	<style>
+		body {
+			font-family: Sans-Serif;
+		}
+	</style>
+</head>
+<body>
+	<h2>Kinect for Windows depth texture recorder and WebGL viewer</h2>
+	The whole thing is kept deliberately simple. You just need a Kinect for Windows v2 and the SDK2.0,<br />
+	Visual Studio to compile the framegrabbers, and a WebGL-enabled browser. Even IE 11 should do fine.<br />
+	The C# code writes the raw depth data to a file as soon as it receives a new frame from the sensor.<br />
+	The Javascript client reads from the file on every animation frame and loads it in a WebGL texture.<br />
+	Animations work too but beware the amount of the uncompressed data: 19MB/s is over 1GB in a minute.<br />
+	<p>TL/DR</p>
+	<ol>
+		<li>Run a saver and data will be written to "C:\Users\Public\Pictures"</li>
+		<li>Open <a href="K4WframeViewer.html" target="new">K4WframeViewer.html</a> and pick it up.</li>
+	</ol>
+</body>
+</html>
